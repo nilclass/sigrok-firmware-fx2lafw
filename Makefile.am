@@ -50,7 +50,8 @@ dirstamps = \
 	hw/hantek-6022be/$(dirstamp) \
 	hw/hantek-6022bl/$(dirstamp) \
 	hw/sainsmart-dds120/$(dirstamp) \
-	hw/yixingdianzi-mdso/$(dirstamp)
+	hw/yixingdianzi-mdso/$(dirstamp) \
+	hw/instrustar-isds205a/$(dirstamp)
 
 # Final firmware files
 firmware_binaries = \
@@ -66,7 +67,8 @@ firmware_binaries = \
 	hw/hantek-6022be/fx2lafw-hantek-6022be.fw \
 	hw/hantek-6022bl/fx2lafw-hantek-6022bl.fw \
 	hw/sainsmart-dds120/fx2lafw-sainsmart-dds120.fw \
-	hw/yixingdianzi-mdso/fx2lafw-yixingdianzi-mdso.fw
+	hw/yixingdianzi-mdso/fx2lafw-yixingdianzi-mdso.fw \
+	hw/instrustar-isds205a/fx2lafw-instrustar-isds205a.fw
 
 fx2lafw_headers = \
 	include/command.h \
@@ -103,6 +105,10 @@ sainsmart_dds120_objects = hw/sainsmart-dds120/fw.rel
 yixingdianzi_mdso_headers = $(scope_headers)
 yixingdianzi_mdso_sources = hw/yixingdianzi-mdso/fw.c
 yixingdianzi_mdso_objects = hw/yixingdianzi-mdso/fw.rel
+
+instrustar_isds205a_headers = $(scope_headers)
+instrustar_isds205a_sources = hw/instrustar-isds205a/fw.c
+instrustar_isds205a_objects = hw/instrustar-isds205a/fw.rel
 
 fx2lib_headers = \
 	fx2lib/include/autovector.h \
@@ -245,7 +251,8 @@ hw_sources = \
 	hw/hantek-6022be/dscr.a51 \
 	hw/hantek-6022bl/dscr.a51 \
 	hw/sainsmart-dds120/dscr.a51 \
-	hw/yixingdianzi-mdso/dscr.a51
+	hw/yixingdianzi-mdso/dscr.a51 \
+	hw/instrustar-isds205a/dscr.a51
 
 firmwaredir = $(datadir)/sigrok-firmware
 firmware_DATA = $(firmware_binaries)
@@ -256,6 +263,7 @@ dist_noinst_DATA = \
 	$(hantek_6022bl_headers) $(hantek_6022bl_sources) \
 	$(sainsmart_dds120_sources) $(sainsmart_dds120_headers) \
 	$(yixingdianzi_mdso_sources) $(yixingdianzi_mdso_headers) \
+	$(instrustar_isds205a_sources) $(instrustar_isds205a_headers) \
 	$(fx2lib_headers) $(fx2lib_sources) $(fx2lib_ints_sources) $(hw_sources)
 dist_noinst_SCRIPTS = autogen.sh
 
@@ -325,6 +333,7 @@ hw/hantek-6022be/dscr.rel: hw/hantek-6022be/$(dirstamp) include/dscr_scope.inc
 hw/hantek-6022bl/dscr.rel: hw/hantek-6022bl/$(dirstamp) include/dscr_scope.inc
 hw/sainsmart-dds120/dscr.rel: hw/sainsmart-dds120/$(dirstamp) include/dscr_scope.inc
 hw/yixingdianzi-mdso/dscr.rel: hw/yixingdianzi-mdso/$(dirstamp) include/dscr_scope.inc
+hw/instrustar-isds205a/dscr.rel: hw/instrustar-isds205a/$(dirstamp) include/dscr_scope.inc
 
 
 # Create build subdirectories
@@ -378,6 +387,9 @@ hw/sainsmart-dds120/fx2lafw-sainsmart-dds120.ihx: hw/sainsmart-dds120/dscr.rel $
 
 hw/yixingdianzi-mdso/fx2lafw-yixingdianzi-mdso.ihx: hw/yixingdianzi-mdso/dscr.rel $(yixingdianzi_mdso_objects) $(fx2lib_libs)
 	$(AM_V_GEN)$(SDCC) -mmcs51 $(SDCC_LINK_FLAGS_SCOPE) -o $@ hw/yixingdianzi-mdso/dscr.rel $(yixingdianzi_mdso_objects) $(fx2lib_libs)
+
+hw/instrustar-isds205a/fx2lafw-instrustar-isds205a.ihx: hw/instrustar-isds205a/dscr.rel $(instrustar_isds205a_objects) $(fx2lib_libs)
+	$(AM_V_GEN)$(SDCC) -mmcs51 $(SDCC_LINK_FLAGS_SCOPE) -o $@ hw/instrustar-isds205a/dscr.rel $(instrustar_isds205a_objects) $(fx2lib_libs)
 
 .a51.rel:
 	$(SF_V_SDAS)$(SDAS8051) -glos $(as_includes) $@ $<
