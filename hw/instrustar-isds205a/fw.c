@@ -4,6 +4,7 @@
  * Copyright (C) 2009 Ubixum, Inc.
  * Copyright (C) 2015 Jochen Hoenicke
  * Copyright (C) 2018 Marek Wodzinski
+ * Copyright (C) 2019 Niklas Cathor <niklas.cathor@gmx.de>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,9 +26,45 @@
 #include <delay.h>
 #include <setupdat.h>
 
+/*
+ * Options for the device are set via an 8bit shift register,
+ * connected to IOA pins PA4/PA5/PA6.
+ *
+ * Bits Q0-Q3 control two multiplexers (one per channel) which select voltage levels.
+ * Each multiplexer only uses 4 of it's outputs (input S2 is physically grounded).
+ *
+ * NOTE: the bit-order is swapped for the first muxer (Q0->S1, Q1->S0), but not
+ *   for the second. See wiring diagram below.
+ *
+ * Bits Q4-Q7 control four relays (two per channel) which select coupling mode
+ * (and also voltage level? I don't know yet)
+ *
+ *
+ *
+ * |             |
+ * |    FX2LA    |
+ * +-------------+
+ *   PA4 PA5 PA6
+ *    |   |   |
+ *   DS  RCK SCK
+ *    |   |   |
+ *   +----------+                 +-----------+
+ *   |          |--Q0---------S1--| 74HC4051D |=== vdivs
+ *   |          |--Q1---------S0--| Channel 1 |===
+ *   |          |--Q2-----\       +-----------+
+ *   | 74HC595D |--Q3----\ \      +-----------+
+ *   |          |         \ \-S0--| 74HC4051D |=== vdivs
+ *   |          |          \--S1--| Channel 2 |===
+ *   |          |                 +-----------+
+ *   |          |
+ *   +----------+
+ *
+ *
+ */
+
 #define SET_ANALOG_MODE()
 
-#define SET_COUPLING(x) set_coupling(x)
+#define SET_COUPLING(x) isds205a_set_coupling(x)
 
 #define SET_CALIBRATION_PULSE(x)
 
@@ -89,6 +126,22 @@ static void update_register(BYTE value, BYTE mask) {
     delay(1);
   }
   PA5 = 1;
+}
+
+static void isds205a_set_coupling(BYTE coupling_cfg) {
+  BYTE update = 0;
+  if (coupling_cfg & 0x01) {
+    update &= ~(1 << 7);
+  } else {
+    update |= 1 << 7;
+  }
+
+  if (coupling_cfg & 0x10) {
+    update &= ~(1 << 5);
+  } else {
+    update |= 1 << 5;
+  }
+  update_register(update, (1 << 5) | (1 << 7));
 }
 
 /*
